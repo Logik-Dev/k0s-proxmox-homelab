@@ -51,6 +51,22 @@ variable "vlan_id" {
 
 }
 
+variable "ip" {
+  description = "ip address"
+  type        = string
+}
+
+variable "gateway" {
+  description = "gateway address"
+  type        = string
+}
+
+variable "dns_servers" {
+  description = "dns servers"
+  type        = list(string)
+  default     = ["1.1.1.1"]
+}
+
 variable "memory" {
   description = "Total memory"
   type        = number

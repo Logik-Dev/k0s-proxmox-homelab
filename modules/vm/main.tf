@@ -19,13 +19,18 @@ resource "proxmox_virtual_environment_vm" "worker" {
   }
 
   initialization {
+    user_data_file_id = var.cloud_config
 
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = var.ip
+        gateway = var.gateway
       }
     }
-    user_data_file_id = var.cloud_config
+    dns {
+      servers = var.dns_servers
+    }
+
   }
 
   cpu {

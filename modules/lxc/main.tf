@@ -31,8 +31,13 @@ resource "proxmox_virtual_environment_container" "container" {
     hostname = var.name
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = var.ip
+        gateway = var.gateway
       }
+    }
+
+    dns {
+      servers = var.dns_servers
     }
 
     user_account {

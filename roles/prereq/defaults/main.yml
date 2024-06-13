@@ -1,0 +1,4 @@
+---
+username: admin
+ssh_key_path: ~/.ssh/yubikey-gpg.pub
+

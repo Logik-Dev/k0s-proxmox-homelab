@@ -1,0 +1,78 @@
+---
+# add controller user
+- name: set user for controller
+  ansible.builtin.user:
+    name: '{{ username }}'
+    state: present
+    groups: sudo
+    create_home: true
+    shell: /bin/bash
+
+# add ssh key
+- name: Set ssh authorized key
+  ansible.posix.authorized_key:
+    user: '{{ username }}'
+    state: present
+    key: "{{ lookup('file', ssh_key_path ) }}"
+
+# sudo nopasswd
+- name: allow nopasswd for sudo
+  community.general.sudoers:
+    name: '{{ username }}'
+    state: present
+    user: '{{ username }}'
+    commands: ALL
+    nopassword: true
+
+# install packages
+- name: install packages
+  ansible.builtin.apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: true
+  loop:
+    - python3-kubernetes
+    - gpg
+    - git
+
+# add helm repo gpg key
+- name: Add helm gpg key
+  ansible.builtin.apt_key:
+    keyserver: https://baltocdn.com/helm/signing.asc
+    keyring: /usr/share/keyrings/helm.gpg
+    id: 294AC4827C1A168A
+    state: present
+
+# add helm apt repo
+- name: Add helm repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/
+      all main
+
+# install helm
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+    update_cache: true
+
+# install helm-diff plugin
+- name: install helm diff plugin
+  kubernetes.core.helm_plugin:
+    plugin_path: https://github.com/databus23/helm-diff
+    state: present
+
+# ssh disable root login
+- name: disable ssh root login
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: ^PermitRootLogin
+    line: PermitRootLogin No
+
+# disable password authentication
+- name: disable password authentication
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: ^PasswordAuthentication
+    line: PasswordAuthentication no
+  notify: reload ssh

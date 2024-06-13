@@ -38,10 +38,13 @@ data "local_file" "ssh_yubikey_key" {
 locals {
   ssh_key = trimspace(data.local_file.ssh_yubikey_key.content)
   env     = terraform.workspace
-  vlan_id = {
+  network = "10.0"
+  vlans = {
     dev  = 111,
     prod = 222
   }
+
+  vlan_id = lookup(local.vlans, local.env)
 }
 
 # ubuntu lxc template
@@ -72,12 +75,14 @@ module "controller" {
   source = "./modules/lxc"
 
   name          = format("%s-control-plane", local.env)
-  id            = parseint(format("%s%s", lookup(local.vlan_id, local.env), 0), 10)
+  id            = parseint(format("%s%s", local.vlan_id, 0), 10)
   template_id   = module.ubuntu_lxc_template.container_template
   tags          = ["k0s", "controller", local.env]
   ssh_keys      = [local.ssh_key]
   root_password = data.sops_file.secrets.data["root_password"]
-  vlan_id       = lookup(local.vlan_id, local.env)
+  vlan_id       = local.vlan_id
+  ip            = format("%s.%s.10/24", local.network, local.vlan_id)
+  gateway       = format("%s.%s.1", local.network, local.vlan_id)
 }
 
 # 2 workers vms
@@ -86,11 +91,13 @@ module "workers" {
   source = "./modules/vm"
 
   name         = format("%s-worker-%s", local.env, count.index + 1)
-  id           = parseint(format("%s%s", lookup(local.vlan_id, local.env), count.index + 1), 10)
+  id           = parseint(format("%s%s", local.vlan_id, count.index + 1), 10)
   image        = module.ubuntu_vm_image.vm_image
   cloud_config = module.cloud_init.cloud_init
   tags         = ["k0s", "worker", local.env]
-  vlan_id      = lookup(local.vlan_id, local.env)
+  vlan_id      = local.vlan_id
+  ip           = format("%s.%s.%s/24", local.network, local.vlan_id, count.index + 11)
+  gateway      = format("%s.%s.1", local.network, local.vlan_id)
   memory       = 8192
   cpus         = 2
   size         = 50
