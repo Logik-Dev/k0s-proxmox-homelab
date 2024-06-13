@@ -1,4 +1,3 @@
 ---
 username: admin
-ssh_key_path: ~/.ssh/yubikey-gpg.pub
-
+ssh_key_path: ./yubikey-gpg.pub
