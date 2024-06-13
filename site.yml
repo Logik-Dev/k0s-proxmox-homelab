@@ -1,6 +1,15 @@
 ---
+
+# prepare lxc controller
 - hosts: controller
   remote_user: root
   roles:
     - role: prereq
       tags: [prereq]
+
+# set hostnames and install common packages 
+- hosts: k0s
+  become: true
+  roles:
+    - role: common
+      tags: [common]

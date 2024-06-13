@@ -62,13 +62,6 @@
     plugin_path: https://github.com/databus23/helm-diff
     state: present
 
-# ssh disable root login
-- name: disable ssh root login
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: ^PermitRootLogin
-    line: PermitRootLogin No
-
 # disable password authentication
 - name: disable password authentication
   lineinfile:

@@ -1,0 +1,12 @@
+---
+# packages
+- name: install needed packages
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+    update_cache: true
+
+# hostnames
+- name: set hostname for all nodes
+  ansible.builtin.hostname:
+    name: '{{ inventory_hostname }}'
