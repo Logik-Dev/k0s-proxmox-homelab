@@ -5,4 +5,3 @@ k0s_download_url: https://github.com/k0sproject/k0s/releases/download
 kubeconfig_dir: /home/{{ username }}/.kube
 k0s_config_dir: /var/lib/k0s
 cni: kuberouter
-gateway_api_manifests_url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/experimental-install.yaml

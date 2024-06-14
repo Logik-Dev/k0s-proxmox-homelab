@@ -1,0 +1,18 @@
+---
+- set_fact:
+    contour_state: "{{ (ingress_controller == 'contour') | ternary('present', 'absent') }}"
+
+# contour manifests
+- name: handle contour manifests
+  kubernetes.core.k8s:
+    state: '{{ contour_state }}'
+    src: https://projectcontour.io/quickstart/contour-gateway-provisioner.yaml
+    wait: true
+
+# gateway
+- name: handle gateway manifests
+  kubernetes.core.k8s:
+    state: '{{ contour_state }}'
+    template:
+      - path: contour/gateway-class.yml
+      - path: contour/gateway.yml

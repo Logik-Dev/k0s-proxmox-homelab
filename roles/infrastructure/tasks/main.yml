@@ -1,3 +1,13 @@
 ---
+
+# metallb
 - include_tasks:
     file: metallb.yml
+
+# cert-manager
+- include_tasks:
+    file: cert-manager.yml
+
+# contour
+- include_tasks:
+    file: contour.yml

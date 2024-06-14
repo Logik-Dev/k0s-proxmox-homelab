@@ -19,22 +19,6 @@
     file: controller.yml
   when: ansible_hostname in groups['controller']
 
-# download gateway api manifests
-- name: download gateway api manifests
-  get_url:
-    url: '{{ gateway_api_manifests_url }}'
-    dest: /home/{{ username }}/gateway-api.yml
-  become: false
-  when: ansible_hostname in groups['controller']
-
-# apply gateway api manifests
-- name: apply gateway api manifests
-  kubernetes.core.k8s:
-    state: present
-    src: /home/{{ username }}/gateway-api.yml
-  become: false
-  when: ansible_hostname in groups['controller']
-
 # workers tasks
 - ansible.builtin.include_tasks:
     file: worker.yml
