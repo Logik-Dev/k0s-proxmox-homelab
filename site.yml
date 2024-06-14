@@ -13,3 +13,10 @@
   roles:
     - role: common
       tags: [common]
+
+# k0s controller
+- hosts: k0s
+  become: true
+  roles:
+    - role: k0s
+      tags: [k0s]

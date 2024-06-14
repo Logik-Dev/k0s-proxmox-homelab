@@ -1,0 +1,41 @@
+---
+# download binary
+- name: download k0s
+  ansible.builtin.get_url:
+    url: '{{ k0s_download_url }}/{{ k0s_version }}/k0s-{{ k0s_version }}-amd64'
+    dest: /usr/bin/k0s
+    mode: '0755'
+    owner: '{{ username }}'
+    group: '{{ username }}'
+
+# create config directory
+- name: create k0s config dir
+  ansible.builtin.file:
+    path: '{{ k0s_config_dir }}'
+    state: directory
+
+# controller tasks
+- ansible.builtin.include_tasks:
+    file: controller.yml
+  when: ansible_hostname in groups['controller']
+
+# download gateway api manifests
+- name: download gateway api manifests
+  get_url:
+    url: '{{ gateway_api_manifests_url }}'
+    dest: /home/{{ username }}/gateway-api.yml
+  become: false
+  when: ansible_hostname in groups['controller']
+
+# apply gateway api manifests
+- name: apply gateway api manifests
+  kubernetes.core.k8s:
+    state: present
+    src: /home/{{ username }}/gateway-api.yml
+  become: false
+  when: ansible_hostname in groups['controller']
+
+# workers tasks
+- ansible.builtin.include_tasks:
+    file: worker.yml
+  when: ansible_hostname in groups['worker']

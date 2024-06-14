@@ -1,0 +1,98 @@
+---
+
+# create kubeconfig_dir
+- name: create remote kubeconfig directory
+  file:
+    path: '{{ kubeconfig_dir }}'
+    state: directory
+  become: false
+
+# create kubeconfig_dir
+- name: create local kubeconfig directory
+  file:
+    path: '{{ kubeconfig_dir }}'
+    state: directory
+  become: false
+  delegate_to: localhost
+
+# copy k0s config
+- name: copy k0s.yml
+  ansible.builtin.template:
+    src: k0s.yml
+    dest: '{{ k0s_config_dir }}/k0s.yml'
+  register: config
+
+# apply custom configuration 
+- name: apply custom controller configuration
+  command: k0s install controller -c {{ k0s_config_dir }}/k0s.yml
+  args:
+    creates: /etc/systemd/system/k0scontroller.service
+  when: config.changed
+
+# enable and start controller service
+- name: enable and start controller service
+  service:
+    name: k0scontroller
+    state: "{{ config.changed | ternary('restarted', 'started') }}"
+    enabled: true
+  register: service
+
+# wait for apiserver
+- name: wait for k0s apiserver
+  wait_for:
+    host: localhost
+    port: 6443
+    delay: 15
+    timeout: 180
+  when: service.changed
+
+# check if token is present
+- name: check if token is present on localhost
+  stat:
+    path: '{{ kubeconfig_dir }}/worker-token'
+  register: worker_token_file
+  delegate_to: localhost
+  become: false
+
+# create worker token
+- name: create worker token
+  register: worker_token
+  command: k0s token create --role worker
+  when: not worker_token_file.stat.exists
+
+# copy token content in local file
+- name: copy token in local file
+  copy:
+    content: '{{ worker_token.stdout }}'
+    dest: '{{ kubeconfig_dir }}/worker-token'
+  delegate_to: localhost
+  become: false
+  when: not worker_token_file.stat.exists
+
+# replace localhost by host ip in kubeconfig
+- name: replace localhost by ip in kubeconfig
+  replace:
+    path: '{{ k0s_config_dir }}/pki/admin.conf'
+    regexp: localhost
+    replace: '{{ ansible_host }}'
+
+# copy admin kubeconfig in user dir remotly
+- name: copy admin kubeconfig to user home
+  copy:
+    src: '{{ k0s_config_dir}}/pki/admin.conf'
+    dest: '{{ kubeconfig_dir }}/config'
+    remote_src: true
+    owner: '{{ username }}'
+    group: '{{ username }}'
+    mode: 0600
+
+# fetch kubeconfig
+- name: fetch kubeconfig locally
+  fetch:
+    src: '{{ kubeconfig_dir }}/config'
+    dest: '{{ kubeconfig_dir }}/config'
+    owner: '{{ username }}'
+    group: '{{ username }}'
+    mode: 0600
+    flat: true
+  become: false

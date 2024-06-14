@@ -1,0 +1,21 @@
+---
+# copy worker token
+- name: copy worker token
+  ansible.builtin.template:
+    src: '{{ kubeconfig_dir }}/worker-token'
+    dest: '{{ k0s_config_dir }}/worker-token'
+  register: copy_token
+
+# join cluster
+- name: join cluster
+  command: k0s install worker --token-file {{ k0s_config_dir}}/worker-token
+  when: copy_token.changed
+  ignore_errors: true
+
+# restart k0sworker service
+- name: restart k0sworker service
+  service:
+    name: k0sworker
+    state: "{{ copy_token.changed | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true
