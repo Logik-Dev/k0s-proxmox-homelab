@@ -38,3 +38,5 @@ I make use of those tags to target dev or prod vms:
 - [ ] Disable PermitRootLogin on lxc (if possible)
 - [ ] Differentiate resources per env properly in ansible roles
 - [ ] On destroy worker token and kubeconfig should be deleted too
+- [ ] Remove namespace after removing helm chart
+- [ ] Fix ansible warning (helm diff, ipaddress filter)

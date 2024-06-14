@@ -20,3 +20,9 @@
   roles:
     - role: k0s
       tags: [k0s]
+
+# infrastructure
+- hosts: controller
+  roles:
+    - role: infrastructure
+      tags: [infra]

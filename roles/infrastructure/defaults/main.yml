@@ -1,0 +1,4 @@
+---
+load_balancer: metallb
+ingress_controller: contour
+vlan_id: "{{ ansible_hostname is match('prod-*') | ternary('222', '111') }}"
