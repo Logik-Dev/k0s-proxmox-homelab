@@ -1,7 +1,6 @@
 ---
 load_balancer: metallb
 ingress_controller: contour
-env: "{{ ansible_hostname is match('prod-*') | ternary('prod', 'dev') }}"
 vlan_id: 999
 email: email@example.com
 domain: domain.example.com
