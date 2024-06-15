@@ -24,6 +24,11 @@ provider "proxmox" {
   }
 }
 
+variable "protected" {
+  type    = bool
+  default = true
+}
+
 # secret file
 data "sops_file" "secrets" {
   source_file = "./secrets.sops.yaml"
@@ -101,4 +106,21 @@ module "workers" {
   memory       = 8192
   cpus         = 2
   size         = 50
+}
+
+# nfs server vm
+module "nfs_server" {
+  source = "./modules/vm"
+
+  name         = format("%s-fast-nfs", local.env)
+  id           = parseint(format("%s%s", local.vlan_id, local.vlan_id), 10)
+  image        = module.ubuntu_vm_image.vm_image
+  cloud_config = module.cloud_init.cloud_init
+  tags         = ["fast-nfs", local.env]
+  vlan_id      = local.vlan_id
+  ip           = format("%s.%s.20/24", local.network, local.vlan_id)
+  gateway      = format("%s.%s.1", local.network, local.vlan_id)
+  memory       = 4096
+  cpus         = 1
+  size         = 300
 }
