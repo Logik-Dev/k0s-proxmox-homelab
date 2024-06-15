@@ -1,0 +1,39 @@
+---
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: wireguard
+spec:
+  selector:
+    matchLabels:
+      app: wireguard
+  template:
+    metadata:
+      labels:
+        app: wireguard
+    spec:
+      containers:
+        - name: wireguard
+          image: lscr.io/linuxserver/wireguard
+          ports:
+            - containerPort: 51820
+              protocol: UDP
+              name: wireguard
+          volumeMounts:
+            - mountPath: /config
+              name: fast-nfs
+          envFrom:
+            - configMapRef:
+                name: wireguard-env
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+            sysctls:
+              - name: net.ipv4.conf.all.src_valid_mark
+                value: '1'
+      volumes:
+        - name: fast-nfs
+          persistentVolumeClaim:
+            claimName: wireguard

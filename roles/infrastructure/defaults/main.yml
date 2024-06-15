@@ -7,3 +7,4 @@ domain: domain.example.com
 cloudflare_token: token
 fast_nfs_export: /nfs
 slow_nfs_export: /nfs
+timezone: Europe/Paris

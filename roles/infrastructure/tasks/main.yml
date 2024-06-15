@@ -14,3 +14,7 @@
 # contour
 - include_tasks:
     file: contour.yml
+
+# wirguard
+- include_tasks:
+    file: wireguard.yml
