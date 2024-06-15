@@ -1,5 +1,4 @@
 ---
-
 # prepare lxc controller
 - hosts: controller
   remote_user: root
@@ -33,3 +32,9 @@
   roles:
     - role: infrastructure
       tags: [infra]
+
+# apps
+- hosts: controller
+  roles:
+    - role: apps/vaultwarden
+      tags: [vaultwarden, vw]
