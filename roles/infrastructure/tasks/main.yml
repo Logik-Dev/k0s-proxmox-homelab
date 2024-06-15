@@ -1,4 +1,7 @@
 ---
+# nfs-provisioner
+- include_tasks:
+    file: nfs-provisioner.yml
 
 # metallb
 - include_tasks:

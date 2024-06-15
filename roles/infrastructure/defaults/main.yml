@@ -6,3 +6,5 @@ vlan_id: 999
 email: email@example.com
 domain: domain.example.com
 cloudflare_token: token
+fast_nfs_export: /nfs
+slow_nfs_export: /nfs
