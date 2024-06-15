@@ -1,0 +1,8 @@
+---
+# cloudflare-ddns
+- name: deploy cronjob to update ip record on change
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: ddns/secret.yml
+      - path: ddns/cron-job.yml

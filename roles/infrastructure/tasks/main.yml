@@ -18,3 +18,7 @@
 # wirguard
 - include_tasks:
     file: wireguard.yml
+
+# cloudflare ddns
+- include_tasks:
+    file: ddns.yml
