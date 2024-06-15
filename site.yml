@@ -8,13 +8,20 @@
       tags: [prereq]
 
 # set hostnames and install common packages 
-- hosts: k0s
+- hosts: all
   become: true
   roles:
     - role: common
       tags: [common]
 
-# k0s controller
+# nfs-server
+- hosts: fast_nfs
+  become: true
+  roles:
+    - role: nfs-server
+      tags: [nfs-server]
+
+# k0s cluster
 - hosts: k0s
   become: true
   roles:

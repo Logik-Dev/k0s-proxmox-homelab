@@ -1,0 +1,32 @@
+---
+# install packages
+- name: install needed packages
+  apt:
+    name: [nfs-common, nfs-kernel-server]
+    state: present
+
+# create directories
+- name: create export directory
+  file:
+    path: '{{ fast_nfs_export }}'
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: 0770
+
+# template
+- name: copy exports file
+  template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nfs
+
+# service  
+- name: start nfs server
+  service:
+    name: nfs-kernel-server
+    state: started
+    enabled: true

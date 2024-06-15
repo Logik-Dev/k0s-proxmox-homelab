@@ -1,0 +1,4 @@
+---
+vlan_id: 999
+fast_nfs_export: /nfs
+fast_nfs_config: 192.168.0.0/16(rw,sync,all_squash,no_subtree_check) 10.0.{{ vlan_id }}.0/16(rw,sync,all_squash,no_subtree_check)

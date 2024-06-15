@@ -28,7 +28,7 @@ I don't want to destroy proxmox files (ISOs, Templates, Snippets), so I use:
 ### Ansible
 The inventory is dynamic and hosts are grouped by tags.
 I make use of those tags to target dev or prod vms:
-`ansible-playbook site.yml --limit 'all:dev'`
+`ansible-playbook site.yml --limit 'dev'`
 
 
 ### TODO
