@@ -1,11 +1,25 @@
 ---
-# namespace
-- name: create seedbox namespace
+# common 
+- name: deploy common manifests
   kubernetes.core.k8s:
     state: present
     template:
-      - path: namespace.yml
+      - path: common/namespace.yml
+      - path: common/cm.yml
+      - path: common/slow-nfs-pvc.yml
 
 # jellyfin
 - include_tasks:
     file: jellyfin.yml
+
+# flaresolverr
+- name: deploy flaresolverr
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: flaresolverr/deployment.yml
+      - path: flaresolverr/service.yml
+
+# prowlarr
+- include_tasks:
+    file: prowlarr.yml

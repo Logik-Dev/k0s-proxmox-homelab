@@ -1,0 +1,14 @@
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaresolverr
+  namespace: seedbox
+spec:
+  selector:
+    app: flaresolverr
+  ports:
+    - port: 80
+      targetPort: http
+

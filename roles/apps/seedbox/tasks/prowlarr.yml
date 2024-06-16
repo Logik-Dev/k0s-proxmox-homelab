@@ -1,0 +1,9 @@
+---
+- name: deploy prowlarr
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: prowlarr/pvc.yml
+      - path: prowlarr/deployment.yml
+      - path: prowlarr/service.yml
+      - path: prowlarr/http-route.yml
