@@ -1,0 +1,8 @@
+---
+- name: deploy jellyfin
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - jellyfin/endpoints.yml
+      - jellyfin/service.yml
+      - jellyfin/http-route.yml

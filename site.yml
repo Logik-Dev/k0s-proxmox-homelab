@@ -43,4 +43,6 @@
 - hosts: controller
   roles:
     - role: apps/vaultwarden
-      tags: [vaultwarden, vw]
+      tags: [vaultwarden, vw, apps]
+    - role: apps/seedbox
+      tags: [seedbox, apps]

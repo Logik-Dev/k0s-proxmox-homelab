@@ -1,0 +1,11 @@
+---
+# namespace
+- name: create seedbox namespace
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: namespace.yml
+
+# jellyfin
+- include_tasks:
+    file: jellyfin.yml
