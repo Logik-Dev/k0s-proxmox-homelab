@@ -33,6 +33,12 @@
     - role: infrastructure
       tags: [infra]
 
+# monitoring
+- hosts: controller
+  roles:
+    - role: monitoring
+      tags: [monitoring]
+
 # apps
 - hosts: controller
   roles:

@@ -1,0 +1,17 @@
+---
+# namespace
+- name: create monitoring namespace
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: namespace.yml
+
+# grafana
+- name: deploy grafana
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: grafana/pvc.yml
+      - path: grafana/deployment.yml
+      - path: grafana/service.yml
+      - path: grafana/http-route.yml
