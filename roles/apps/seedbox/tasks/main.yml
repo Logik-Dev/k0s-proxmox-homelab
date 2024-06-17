@@ -31,3 +31,7 @@
 # radarr
 - include_tasks:
     file: radarr.yml
+
+# sonarr
+- include_tasks:
+    file: sonarr.yml
