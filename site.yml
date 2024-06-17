@@ -46,3 +46,5 @@
       tags: [vaultwarden, vw, apps]
     - role: apps/seedbox
       tags: [seedbox, apps]
+    - role: apps/nextcloud
+      tags: [nextcloud, apps]

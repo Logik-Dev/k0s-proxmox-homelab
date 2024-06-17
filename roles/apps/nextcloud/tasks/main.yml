@@ -1,0 +1,9 @@
+---
+- name: route to external nextcloud
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: namespace.yml
+      - path: endpoints.yml
+      - path: svc.yml
+      - path: http-route.yml
