@@ -27,3 +27,7 @@
 # torrent + vpn
 - include_tasks:
     file: torrent.yml
+
+# radarr
+- include_tasks:
+    file: radarr.yml
