@@ -1,0 +1,65 @@
+---
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gluetun
+  namespace: seedbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gluetun
+  template:
+    metadata:
+      labels:
+        app: gluetun
+    spec:
+      containers:
+        # wireguard vpn
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.37.0
+          envFrom:
+            - secretRef:
+                name: wireguard-secret
+          volumeMounts:
+            - mountPath: /gluetun
+              name: gluetun
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 10m
+            limits:
+              memory: 512Mi
+              cpu: 300m
+        # torrent
+        - name: torrent
+          image: lscr.io/linuxserver/qbittorrent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 47594
+              name: peer
+          envFrom:
+            - configMapRef:
+                name: torrent-env
+            - configMapRef:
+                name: common-env
+          volumeMounts:
+            - mountPath: /config
+              name: torrent
+            - mountPath: /slow-nfs
+              name: slow-nfs
+      volumes:
+        - name: gluetun
+          persistentVolumeClaim:
+            claimName: gluetun
+        - name: torrent
+          persistentVolumeClaim:
+            claimName: torrent
+        - name: slow-nfs
+          persistentVolumeClaim:
+            claimName: slow-nfs

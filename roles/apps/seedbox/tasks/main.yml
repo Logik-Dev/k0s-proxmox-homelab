@@ -23,3 +23,7 @@
 # prowlarr
 - include_tasks:
     file: prowlarr.yml
+
+# torrent + vpn
+- include_tasks:
+    file: torrent.yml

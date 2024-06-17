@@ -1,0 +1,12 @@
+---
+- name: deploy torrent + vpn
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: torrent/cm.yml
+      - path: torrent/torrent-pvc.yml
+      - path: torrent/wireguard-pvc.yml
+      - path: torrent/secret.yml
+      - path: torrent/deployment.yml
+      - path: torrent/service.yml
+      - path: torrent/http-route.yml

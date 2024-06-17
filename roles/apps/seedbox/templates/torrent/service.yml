@@ -1,0 +1,13 @@
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: torrent
+  namespace: seedbox
+spec:
+  selector:
+    app: gluetun
+  ports:
+    - port: 80
+      targetPort: 8080
