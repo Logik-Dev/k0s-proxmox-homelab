@@ -1,9 +1,0 @@
----
-- name: deploy sonarr
-  kubernetes.core.k8s:
-    state: present
-    template:
-      - path: sonarr/pvc.yml
-      - path: sonarr/deployment.yml
-      - path: sonarr/service.yml
-      - path: sonarr/http-route.yml

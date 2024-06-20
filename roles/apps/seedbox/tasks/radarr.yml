@@ -1,9 +1,0 @@
----
-- name: deploy radarr
-  kubernetes.core.k8s:
-    state: present
-    template:
-      - path: radarr/pvc.yml
-      - path: radarr/deployment.yml
-      - path: radarr/service.yml
-      - path: radarr/http-route.yml

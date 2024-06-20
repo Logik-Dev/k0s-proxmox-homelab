@@ -9,6 +9,14 @@ terraform {
       source  = "bpg/proxmox"
       version = "0.57.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.11.2"
+    }
+    flux = {
+      source  = "fluxcd/flux"
+      version = ">= 1.3"
+    }
   }
 }
 
@@ -24,10 +32,22 @@ provider "proxmox" {
   }
 }
 
-variable "protected" {
-  type    = bool
-  default = true
+# flux provider
+provider "flux" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+
+  git = {
+    url = "https://github.com/${local.github_user}/${local.github_repo}.git"
+    http = {
+      username = local.github_user
+      password = data.sops_file.secrets.data["flux_github_token"]
+    }
+
+  }
 }
+
 
 # secret file
 data "sops_file" "secrets" {
@@ -41,9 +61,11 @@ data "local_file" "ssh_yubikey_key" {
 
 # local variables
 locals {
-  ssh_key = trimspace(data.local_file.ssh_yubikey_key.content)
-  env     = terraform.workspace
-  network = "10.0"
+  github_user = "Logik-Dev"
+  github_repo = "flux-homelab"
+  ssh_key     = trimspace(data.local_file.ssh_yubikey_key.content)
+  env         = terraform.workspace
+  network     = "10.0"
   vlans = {
     dev  = 111,
     prod = 222
@@ -92,8 +114,9 @@ module "controller" {
 
 # 2 workers vms
 module "workers" {
-  count  = 2
-  source = "./modules/vm"
+  depends_on = [module.controller]
+  count      = 2
+  source     = "./modules/vm"
 
   name         = format("%s-worker-%s", local.env, count.index + 1)
   id           = parseint(format("%s%s", local.vlan_id, count.index + 1), 10)
@@ -123,4 +146,25 @@ module "nfs_server" {
   memory       = 4096
   cpus         = 1
   size         = 300
+}
+
+# playbook
+resource "null_resource" "playbook" {
+  depends_on = [module.workers, module.controller]
+  provisioner "local-exec" {
+    command = "ansible-playbook bootstrap.yml -l ${terraform.workspace} -e first_init=true"
+  }
+}
+
+# wait 15 seconds for k8s to be ready
+resource "time_sleep" "sleep_after_playbook" {
+  depends_on      = [null_resource.playbook]
+  create_duration = "15s"
+}
+
+# bootstrap flux
+resource "flux_bootstrap_git" "this" {
+  depends_on           = [time_sleep.sleep_after_playbook]
+  delete_git_manifests = false
+  path                 = format("clusters/%s-cluster", terraform.workspace)
 }

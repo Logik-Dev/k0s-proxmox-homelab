@@ -1,9 +1,0 @@
----
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: ip-pool
-  namespace: metallb-system
-spec:
-  # 8 IPs should be sufficient (from 40 to 47)
-  addresses: ['10.0.{{ vlan_id }}.40/29']
