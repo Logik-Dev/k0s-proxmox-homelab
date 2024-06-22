@@ -96,3 +96,13 @@
     mode: 0600
     flat: true
   become: false
+
+# create sops secrets
+- name: deploy sops secret
+  become: false
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: flux/namespace.yml
+      - path: flux/sops-age.yml
+      - path: flux/cluster-secrets.yml
