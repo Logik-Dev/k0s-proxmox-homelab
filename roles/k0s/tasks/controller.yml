@@ -106,3 +106,10 @@
       - path: flux/namespace.yml
       - path: flux/sops-age.yml
       - path: flux/cluster-secrets.yml
+
+# apply gateway api manifests
+- name: apply gateway api manifests
+  become: false
+  kubernetes.core.k8s:
+    state: present
+    src: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
