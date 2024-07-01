@@ -34,6 +34,7 @@ variable "datastore" {
 variable "image" {
   description = "OS image"
   type        = string
+  default     = "local:iso/noble-server-cloudimg-amd64.img"
 }
 
 variable "size" {
@@ -63,7 +64,6 @@ variable "dns_servers" {
   type        = list(string)
   default     = ["1.1.1.1"]
 }
-
 
 variable "memory" {
   description = "Total memory"

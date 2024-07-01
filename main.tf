@@ -1,53 +1,3 @@
-# providers
-terraform {
-  required_providers {
-    sops = {
-      source  = "carlpett/sops"
-      version = "~> 0.5"
-    }
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.57.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.11.2"
-    }
-    flux = {
-      source  = "fluxcd/flux"
-      version = ">= 1.3"
-    }
-  }
-}
-
-# proxmox provider
-provider "proxmox" {
-  endpoint  = data.sops_file.secrets.data["proxmox_url"]
-  api_token = data.sops_file.secrets.data["api_token"]
-  insecure  = false
-
-  ssh {
-    agent    = true
-    username = data.sops_file.secrets.data["ssh_user"]
-  }
-}
-
-# flux provider
-provider "flux" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
-
-  git = {
-    url = "https://github.com/${local.github_user}/${local.github_repo}.git"
-    http = {
-      username = local.github_user
-      password = data.sops_file.secrets.data["flux_github_token"]
-    }
-
-  }
-}
-
 
 # secret file
 data "sops_file" "secrets" {
@@ -65,33 +15,18 @@ locals {
   github_repo = "flux-homelab"
   ssh_key     = trimspace(data.local_file.ssh_yubikey_key.content)
   env         = terraform.workspace
-  network     = "10.0"
+  network     = "192.168"
   vlans = {
-    dev  = 111,
-    prod = 222
+    dev  = 12,
+    prod = 11
   }
 
   vlan_id = lookup(local.vlans, local.env)
 }
 
-# ubuntu lxc template
-module "ubuntu_lxc_template" {
-  source = "./modules/templates"
-  type   = "vztmpl"
-  url    = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-}
-
-# ubuntu vm image
-module "ubuntu_vm_image" {
-  source = "./modules/templates"
-  type   = "iso"
-  url    = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
-}
-
 # cloud-init config
 module "cloud_init" {
-  source   = "./modules/templates"
-  type     = "snippets"
+  source   = "./modules/cloud_init"
   ssh_user = data.sops_file.secrets.data["ssh_user"]
   ssh_key  = local.ssh_key
 
@@ -103,7 +38,6 @@ module "controller" {
 
   name          = format("%s-control-plane", local.env)
   id            = parseint(format("%s%s", local.vlan_id, 0), 10)
-  template_id   = module.ubuntu_lxc_template.container_template
   tags          = ["k0s", "controller", local.env]
   ssh_keys      = [local.ssh_key]
   root_password = data.sops_file.secrets.data["root_password"]
@@ -115,12 +49,11 @@ module "controller" {
 # 2 workers vms
 module "workers" {
   depends_on = [module.controller]
-  count      = 2
-  source     = "./modules/vm"
+  count        = 2
+  source       = "./modules/vm"
 
   name         = format("%s-worker-%s", local.env, count.index + 1)
   id           = parseint(format("%s%s", local.vlan_id, count.index + 1), 10)
-  image        = module.ubuntu_vm_image.vm_image
   cloud_config = module.cloud_init.cloud_init
   tags         = ["k0s", "worker", local.env]
   vlan_id      = local.vlan_id
@@ -136,8 +69,8 @@ module "nfs_server" {
   source = "./modules/vm"
 
   name         = format("%s-fast-nfs", local.env)
-  id           = parseint(format("%s%s", local.vlan_id, local.vlan_id), 10)
-  image        = module.ubuntu_vm_image.vm_image
+  id           = parseint(format("%s", local.vlan_id * 10 + 3), 10)
+  image        = "local:iso/noble-server-cloudimg-amd64.img"
   cloud_config = module.cloud_init.cloud_init
   tags         = ["fast-nfs", local.env]
   vlan_id      = local.vlan_id
@@ -167,4 +100,5 @@ resource "flux_bootstrap_git" "this" {
   depends_on           = [time_sleep.sleep_after_playbook]
   delete_git_manifests = false
   path                 = format("clusters/%s-cluster", terraform.workspace)
+  components_extra     = ["image-reflector-controller", "image-automation-controller"]
 }
