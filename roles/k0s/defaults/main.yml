@@ -5,3 +5,4 @@ k0s_download_url: https://github.com/k0sproject/k0s/releases/download
 kubeconfig_dir: /home/{{ username }}/.kube
 k0s_config_dir: /var/lib/k0s
 cni: kuberouter
+first_init: false

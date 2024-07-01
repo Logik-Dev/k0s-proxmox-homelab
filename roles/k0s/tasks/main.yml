@@ -1,4 +1,31 @@
 ---
+- name: manage local files
+  become: false
+  when: first_init and ansible_hostname in groups['controller']
+  delegate_to: localhost
+  block:
+  # check if local kubeconfig exists
+    - name: check for local kubeconfig
+      stat:
+        path: '{{ kubeconfig_dir }}/config'
+      register: local_kubeconfig
+
+  # move old local kubeconfig
+    - name: move old local kubeconfig
+      command: mv {{ kubeconfig_dir }}/config {{ kubeconfig_dir }}/{{ env }}-config.old
+      when: local_kubeconfig.stat.exists
+
+  # check if local worker-token exists
+    - name: check for local worker-token
+      stat:
+        path: '{{ kubeconfig_dir }}/worker-token'
+      register: local_token
+
+  # delete local worker token
+    - name: delete local worker token
+      command: rm {{ kubeconfig_dir }}/worker-token
+      when: local_token.stat.exists
+
 # download binary
 - name: download k0s
   ansible.builtin.get_url:

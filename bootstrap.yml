@@ -1,0 +1,45 @@
+---
+# wait for vm
+# - hosts: worker
+#   become: false
+#   tasks:
+#     - name: wait for controller to start
+#       ansible.builtin.wait_for:
+#         host: "{{ hostvars[groups['controller'][0]]['ansible_host'] }}"
+#         port: 22
+#         delay: 10
+#       delegate_to: localhost
+- hosts: controller
+  remote_user: root
+  gather_facts: false
+  tasks:
+    - name: wait for connection
+      wait_for_connection:
+
+# prepare lxc controller
+- hosts: controller
+  remote_user: root
+  roles:
+    - role: prereq
+      tags: [prereq]
+
+# set hostnames and install common packages 
+- hosts: k0s
+  become: true
+  roles:
+    - role: common
+      tags: [common]
+
+# nfs-server
+- hosts: fast_nfs
+  become: true
+  roles:
+    - role: nfs-server
+      tags: [nfs-server]
+
+# k0s cluster
+- hosts: k0s
+  become: true
+  roles:
+    - role: k0s
+      tags: [k0s]

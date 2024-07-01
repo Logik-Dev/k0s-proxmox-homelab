@@ -22,6 +22,7 @@ variable "tags" {
 variable "template_id" {
   description = "Unique identifier of the template"
   type        = string
+  default     = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 }
 variable "datastore" {
   description = "Datastore where the container's disk will reside"
